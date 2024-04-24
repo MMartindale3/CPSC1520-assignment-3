@@ -42,7 +42,6 @@ function onAddFavourite(e) {
     e.preventDefault();
     // TODO: add to favourites functionality
 }
-
 const removeFavouritesButton = document.querySelector("#remove-favourites-button");
 removeFavouritesButton.addEventListener("click", onRemoveFavourite);
 function onRemoveFavourite(e) {
