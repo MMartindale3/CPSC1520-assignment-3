@@ -16,7 +16,7 @@ function onSwitchToFavourites(e) {
     favouritesTabSelect.classList.add("active");
     favouritesTab.classList.remove("d-none");
     searchTab.classList.add("d-none");
-    // TODO: RenderFavourites();
+    // TODO: RenderFavourites(); GET??
     console.log("switched to favourites");
 }
 
@@ -34,19 +34,19 @@ const searchButton = document.querySelector("#search-button");
 searchButton.addEventListener("click", onSearchButton);
 function onSearchButton(e) {
     e.preventDefault();
-    // TODO: search querying, RenderSearchResults();
+    // TODO: search querying, RenderSearchResults(); GET??
 }
 const addFavouritesButton = document.querySelector("#add-favourites-button");
 addFavouritesButton.addEventListener("click", onAddFavourite);
 function onAddFavourite(e) {
     e.preventDefault();
-    // TODO: add to favourites functionality
+    // TODO: add to favourites functionality POST??
 }
 const removeFavouritesButton = document.querySelector("#remove-favourites-button");
 removeFavouritesButton.addEventListener("click", onRemoveFavourite);
 function onRemoveFavourite(e) {
     e.preventDefault();
-    // TODO: remove from favourites functionality
+    // TODO: remove from favourites functionality DELETE??
 }
 
 function RenderSearchResults() {
