@@ -1,9 +1,15 @@
+import {nanoid} from 'nanoid'
 import { getAlbum, postAlbum } from "./api/tasks";
-// const masterCopy = document.querySelector("#search-results").cloneNode(true);
+const masterSearchCopy = document.querySelector("#search-results").cloneNode(true);
+const masterFavouritesCopy = document.querySelector("#favorites").cloneNode(true);
+
+let favouriteStore = [];
 
 async function appInit() {
     const fetchData = await getAlbum("https://661897109a41b1b3dfbd735b.mockapi.io/api/v1/albums");
-    return fetchData;
+    favouriteStore = await getAlbum("https://661897109a41b1b3dfbd735b.mockapi.io/api/v1/favourites")
+    renderAlbums(fetchData);
+    return favouriteStore;
 }
 appInit();
 
@@ -19,7 +25,7 @@ function onSwitchToFavourites(e) {
     favouritesTabButton.classList.add("active");
     favouritesTab.classList.remove("d-none");
     searchTab.classList.add("d-none");
-    getAlbum("https:661897109a41b1b3dfbd735b.mockapi.io/api/v1/favourites");
+    renderFavourites(favouriteStore);
     console.log("switched to favourites");
 }
 
@@ -39,57 +45,67 @@ function onSearchButton(e) {
     e.preventDefault();
     // TODO: search querying, RenderSearchResults(); GET??
 }
-const addFavouritesButton = document.querySelector("#add-favourites-button");
-addFavouritesButton.addEventListener("click", onAddFavourite);
-function onAddFavourite(e) {
+
+async function onAddFavourite(e) {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget)
-    const newFavourite = formData.get("album");
-    const payload = {
-        uid: "i",
-        album,
-        type: "type",
+
+	const album = document.querySelector("album");
+    if (album.length) {
+        const uid = nanoid().substring(0,8);
+        const newTask = await postAlbum(album, uid);
+        favouriteStore.push(newTask);
     }
-    postAlbum(payload);
-    appInit();
 }
-const removeFavouritesButton = document.querySelector("#remove-favourites-button");
-removeFavouritesButton.addEventListener("click", onRemoveFavourite);
+
 function onRemoveFavourite(e) {
     e.preventDefault();
-    // TODO: remove from favourites functionality DELETE
+
 }
 
 function renderAlbums(albums) {
-    const container = masterCopy.cloneNode(true)
-    albums.forEach(({albumName, artistName, uid}) => {
+    const container = masterSearchCopy.cloneNode(true);
+    const container2 = masterFavouritesCopy.cloneNode(true);
+    albums.forEach(({ id, albumName, averageRating, artistName }) => {
         const template = `
-        <li name="album" data-uid="${uid}" class="list-group-item d-flex justify-content-between align-items-start">
+        <li name="album" id="album" data-uid="${id}" class="list-group-item d-flex justify-content-between align-items-start">
         <div class="ms-2 me-auto">
         <div class="fw-bold">
         ${albumName}
-        <span class="badge bg-primary rounded-pill">4.23</span>
+        <span class="badge bg-primary rounded-pill">${averageRating}</span>
         </div>
         <span>${artistName}</span>
         </div>
-        <button type="button" id="add-favourites-button" class="btn btn-success">Add To Favourites</button>
-    </li>
-    `
-        container.insertAdjacentHTML('afterbegin', template)
+        <button data-uid="${id}" type="button" id="add-favourites-button" class="btn btn-success">Add To Favourites</button>
+        </li>
+        `
+        const elem = document.createRange().createContextualFragment(template).children[0];
+
+        elem.querySelector("button").addEventListener("click", onAddFavourite);
+        container.append(elem);
     })
-    document.querySelector("#search-results").replaceWith(container)
+    document.querySelector("#search-results").replaceWith(container);
 }
 
 
-function RenderFavourites() {
-    const template = `<!-- <li class="list-group-item d-flex justify-content-between align-items-start">
-    <div class="ms-2 me-auto">
-    <div class="fw-bold">
-   OK Computer
-    <span class="badge bg-primary rounded-pill">4.23</span>
-    </div>
-    <span> Radiohead </span>
-    </div>
-    <button type="button" id="remove-favourites-button" class="btn btn-success">Remove From Favourites</button>
-</li> -->`
+function renderFavourites(albums) {
+    const container2 = masterFavouritesCopy.cloneNode(true);
+    albums.forEach(({ id, albumName, averageRating, artistName }) => {
+        const template = `
+        <li name="album" id="album" data-uid="${id}" class="list-group-item d-flex justify-content-between align-items-start">
+        <div class="ms-2 me-auto">
+        <div class="fw-bold">
+        ${albumName}
+        <span class="badge bg-primary rounded-pill">${averageRating}</span>
+        </div>
+        <span>${artistName}</span>
+        </div>
+        <button data-uid="${id}" type="button" id="add-favourites-button" class="btn btn-success">Remove From Favourites</button>
+        </li>
+        `
+        const elem = document.createRange().createContextualFragment(template).children[0];
+
+        elem.querySelector("button").addEventListener("click", onRemoveFavourite);
+        container2.append(elem);
+    })
+    document.querySelector("favorites");
 }
