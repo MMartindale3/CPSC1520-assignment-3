@@ -1,30 +1,33 @@
+import { getAlbum, postAlbum } from "./api/tasks";
+// const masterCopy = document.querySelector("#search-results").cloneNode(true);
+
 async function appInit() {
-    const response = await fetch("https://661897109a41b1b3dfbd735b.mockapi.io/albums");
-    const fetchData = await response.json();
+    const fetchData = await getAlbum("https://661897109a41b1b3dfbd735b.mockapi.io/api/v1/albums");
+    return fetchData;
 }
 appInit();
 
-const favouritesTabSelect = document.querySelector("#favorites-button");
-const searchTabSelect = document.querySelector("#search-button");
+const favouritesTabButton = document.querySelector("#favorites-button");
+const searchTabButton = document.querySelector("#search-button");
 const favouritesTab = document.querySelector("#favorites-tab");
 const searchTab = document.querySelector("#search-tab");
 
-favouritesTabSelect.addEventListener("click", onSwitchToFavourites);
+favouritesTabButton.addEventListener("click", onSwitchToFavourites);
 function onSwitchToFavourites(e) {
     e.preventDefault();
-    searchTabSelect.classList.remove("active");
-    favouritesTabSelect.classList.add("active");
+    searchTabButton.classList.remove("active");
+    favouritesTabButton.classList.add("active");
     favouritesTab.classList.remove("d-none");
     searchTab.classList.add("d-none");
-    // TODO: RenderFavourites(); GET??
+    getAlbum("https:661897109a41b1b3dfbd735b.mockapi.io/api/v1/favourites");
     console.log("switched to favourites");
 }
 
-searchTabSelect.addEventListener("click", onSwitchToSearch);
+searchTabButton.addEventListener("click", onSwitchToSearch);
 function onSwitchToSearch(e) {
     e.preventDefault();
-    searchTabSelect.classList.add("active");
-    favouritesTabSelect.classList.remove("active");
+    searchTabButton.classList.add("active");
+    favouritesTabButton.classList.remove("active");
     favouritesTab.classList.add("d-none");
     searchTab.classList.remove("d-none");
     console.log("switched to search");
@@ -40,27 +43,43 @@ const addFavouritesButton = document.querySelector("#add-favourites-button");
 addFavouritesButton.addEventListener("click", onAddFavourite);
 function onAddFavourite(e) {
     e.preventDefault();
-    // TODO: add to favourites functionality POST??
+    const formData = new FormData(e.currentTarget)
+    const newFavourite = formData.get("album");
+    const payload = {
+        uid: "i",
+        album,
+        type: "type",
+    }
+    postAlbum(payload);
+    appInit();
 }
 const removeFavouritesButton = document.querySelector("#remove-favourites-button");
 removeFavouritesButton.addEventListener("click", onRemoveFavourite);
 function onRemoveFavourite(e) {
     e.preventDefault();
-    // TODO: remove from favourites functionality DELETE??
+    // TODO: remove from favourites functionality DELETE
 }
 
-function RenderSearchResults() {
-    const template = `<!-- <li class="list-group-item d-flex justify-content-between align-items-start">
-    <div class="ms-2 me-auto">
-    <div class="fw-bold">
-   OK Computer
-    <span class="badge bg-primary rounded-pill">4.23</span>
-    </div>
-    <span> Radiohead </span>
-    </div>
-    <button type="button" id="add-favourites-button" class="btn btn-success">Add To Favourites</button>
-</li> -->`
+function renderAlbums(albums) {
+    const container = masterCopy.cloneNode(true)
+    albums.forEach(({albumName, artistName, uid}) => {
+        const template = `
+        <li name="album" data-uid="${uid}" class="list-group-item d-flex justify-content-between align-items-start">
+        <div class="ms-2 me-auto">
+        <div class="fw-bold">
+        ${albumName}
+        <span class="badge bg-primary rounded-pill">4.23</span>
+        </div>
+        <span>${artistName}</span>
+        </div>
+        <button type="button" id="add-favourites-button" class="btn btn-success">Add To Favourites</button>
+    </li>
+    `
+        container.insertAdjacentHTML('afterbegin', template)
+    })
+    document.querySelector("#search-results").replaceWith(container)
 }
+
 
 function RenderFavourites() {
     const template = `<!-- <li class="list-group-item d-flex justify-content-between align-items-start">
