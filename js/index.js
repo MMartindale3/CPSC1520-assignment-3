@@ -57,6 +57,7 @@ async function onAddFavourite(e) {
     }
 }
 
+
 function onRemoveFavourite(e) {
     e.preventDefault();
 
