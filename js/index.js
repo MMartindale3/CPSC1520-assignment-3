@@ -58,8 +58,11 @@ function searchNameAlbumArtist(searchQuery) {
             return album
         }
     });
+    document.querySelector("#search-results").replaceChildren();
     return searchResults;
 }
+
+document.querySelector("#add-favourites").addEventListener("click", onAddFavourite)
 async function onAddFavourite(e) {
     e.preventDefault();
 
@@ -73,7 +76,6 @@ async function onAddFavourite(e) {
 
 function onRemoveFavourite(e) {
     e.preventDefault();
-
 }
 
 function renderAlbums(albums) {
@@ -94,10 +96,8 @@ function renderAlbums(albums) {
     });
 }
 
-
-
 function renderFavourites(albums) {
-    const container2 = masterFavouritesCopy.cloneNode(true);
+    const container = masterFavouritesCopy.cloneNode(true);
     albums.forEach(({ id, albumName, averageRating, artistName }) => {
         const template = `
         <li name="album" id="album" data-uid="${id}" class="list-group-item d-flex justify-content-between align-items-start">
@@ -114,7 +114,7 @@ function renderFavourites(albums) {
         const elem = document.createRange().createContextualFragment(template).children[0];
 
         elem.querySelector("button").addEventListener("click", onRemoveFavourite);
-        container2.append(elem);
+        container.remove(elem);
     })
     document.querySelector("favorites");
 }
