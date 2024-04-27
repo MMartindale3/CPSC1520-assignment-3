@@ -1,15 +1,15 @@
-import {nanoid} from 'nanoid'
+import { nanoid } from 'nanoid'
 import { getAlbum, postAlbum } from "./api/tasks";
 const masterSearchCopy = document.querySelector("#search-results").cloneNode(true);
 const masterFavouritesCopy = document.querySelector("#favorites").cloneNode(true);
 
+let albumStore = [];
 let favouriteStore = [];
 
 async function appInit() {
-    const fetchData = await getAlbum("https://661897109a41b1b3dfbd735b.mockapi.io/api/v1/albums");
+    albumStore = await getAlbum("https://661897109a41b1b3dfbd735b.mockapi.io/api/v1/albums");
     favouriteStore = await getAlbum("https://661897109a41b1b3dfbd735b.mockapi.io/api/v1/favourites")
-    renderAlbums(fetchData);
-    return favouriteStore;
+    return albumStore, favouriteStore;
 }
 appInit();
 
@@ -39,19 +39,33 @@ function onSwitchToSearch(e) {
     console.log("switched to search");
 }
 
-const searchButton = document.querySelector("#search-button");
-searchButton.addEventListener("click", onSearchButton);
-function onSearchButton(e) {
+document.querySelector("#search-form").addEventListener("submit", onAlbumFilterRequest);
+function onAlbumFilterRequest(e) {
     e.preventDefault();
-    // TODO: search querying, RenderSearchResults(); GET??
+    const formData = new FormData(e.currentTarget); // uses the name attribute for name value pairs
+    const searchQuery = formData.get("query").trim().toLowerCase(); // sanitize the search
+    const albums = searchNameAlbumArtist(searchQuery);
+    renderAlbums(albums);
 }
 
+function searchNameAlbumArtist(searchQuery) {
+    const query = searchQuery;
+    const searchResults = albumStore.filter((album) => {
+        if (album.albumName.toLowerCase().includes(query)) {
+            return album
+        }
+        if (album.artistName.toLowerCase().includes(query)) {
+            return album
+        }
+    });
+    return searchResults;
+}
 async function onAddFavourite(e) {
     e.preventDefault();
 
-	const album = document.querySelector("album");
+    const album = document.querySelector("album");
     if (album.length) {
-        const uid = nanoid().substring(0,8);
+        const uid = nanoid().substring(0, 8);
         const newTask = await postAlbum(album, uid);
         favouriteStore.push(newTask);
     }
@@ -63,28 +77,23 @@ function onRemoveFavourite(e) {
 }
 
 function renderAlbums(albums) {
-    const container = masterSearchCopy.cloneNode(true);
-    const container2 = masterFavouritesCopy.cloneNode(true);
     albums.forEach(({ id, albumName, averageRating, artistName }) => {
         const template = `
-        <li name="album" id="album" data-uid="${id}" class="list-group-item d-flex justify-content-between align-items-start">
-        <div class="ms-2 me-auto">
-        <div class="fw-bold">
-        ${albumName}
-        <span class="badge bg-primary rounded-pill">${averageRating}</span>
-        </div>
-        <span>${artistName}</span>
-        </div>
-        <button data-uid="${id}" type="button" id="add-favourites-button" class="btn btn-success">Add To Favourites</button>
-        </li>
+            <li name="album" id="album" data-uid="${id}" class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold">
+                        ${albumName}
+                        <span class="badge bg-primary rounded-pill">${averageRating}</span>
+                    </div>
+                <span>${artistName}</span>
+                </div>
+            <button data-uid="${id}" type="button" id="add-favourites" class="btn btn-success">Add To Favourites</button>
+            </li>
         `
-        const elem = document.createRange().createContextualFragment(template).children[0];
-
-        elem.querySelector("button").addEventListener("click", onAddFavourite);
-        container.append(elem);
-    })
-    document.querySelector("#search-results").replaceWith(container);
+        document.querySelector("#search-results").insertAdjacentHTML("beforeend", template);        
+    });
 }
+
 
 
 function renderFavourites(albums) {
